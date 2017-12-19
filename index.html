@@ -4,51 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    div {
-      width: 100px;
-      height: 100px;
-      background-color: blue;
-      -webkit-animation-name: example;
-      /* Safari 4.0 - 8.0 */
-      -webkit-animation-duration: 4s;
-      /* Safari 4.0 - 8.0 */
-      animation-name: example;
-      animation-duration: 4s;
-    }
-
-    /* Safari 4.0 - 8.0 */
-
-    @-webkit-keyframes example {
-      from {
-        background-color: red;
+      svg {
+        display: block;
+        margin: 0 auto;
       }
-      to {
-        background-color: yellow;
-      }
-    }
-
-    /* Standard syntax */
-
-    @keyframes example {
-      from {
-        background-color: red;
-      }
-      to {
-        background-color: yellow;
-      }
-    }
   </style>
 </head>
 
 <body>
-
-  <p><b>Note:</b> This example does not work in Internet Explorer 9 and earlier versions.</p>
-
-  <div></div>
-
-  <p><b>Note:</b> When an animation is finished, it changes back to its original style.</p>
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="https://d3js.org/d3-selection.v1.min.js"></script>
+  <script src="https://d3js.org/d3-color.v1.min.js"></script>
+  <script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
+  <script src="https://d3js.org/d3-ease.v1.min.js"></script>
+  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+  <script src="https://d3js.org/d3-selection.v1.min.js"></script>
+  <script src="https://d3js.org/d3-timer.v1.min.js"></script>
+  <script src="https://d3js.org/d3-transition.v1.min.js"></script>
   <script>
     d3.xml("ideat_table.svg", function(xml) {
       document.body.appendChild(xml.documentElement);
@@ -58,12 +30,54 @@
       //   .attr("cy", 100)
       //   .attr("r", 20)
       //   .style("fill", "red");
+      var minimo = Math.min(window.innerWidth, window.innerHeight) + 'px';
+      d3.select('svg').style('width', minimo);
+      d3.select('svg').style('height', minimo);
 
       onLoadXML();
     });
 
 
     function onLoadXML() {
+
+      d3.selectAll('.opciones').each(function(d,i) {
+        d3.select(this).style('opacity', '0');
+      });
+
+      var t = d3.transition()
+          .duration(750)
+          .ease(d3.easeLinear);
+
+      var over = {};
+
+      d3.selectAll('.tema').each(function(d,i) {
+
+        d3.select(this).on('mouseenter', function() {
+          var tipoTema = d3.select(this).attr("class").replace('tema ','').replace(' tema','');
+          console.log('mouseenter', tipoTema, over[tipoTema]);
+          //d3.select('.opciones.' + tipoTema).style('opacity', '1');
+          d3.select('.opciones.' + tipoTema).transition(t)
+              .style('opacity', '1');
+          over[tipoTema] = true; // over
+        });
+
+        d3.select(this).on('mouseleave', function() {
+          var tipoTema = d3.select(this).attr("class").replace('tema ','').replace(' tema','');
+          console.log('mouseleave', tipoTema, over[tipoTema]);
+          over[tipoTema] = false;
+
+          var check = function(){
+            console.log('check', tipoTema, over);
+            if(!over[tipoTema]){
+              d3.select('.opciones.' + tipoTema).style('opacity', '0');
+            } else {
+              setTimeout(check, 1000);
+            }
+          };
+          setTimeout(check, 1000);
+        });
+
+      });
       // d3.selectAll('rect[onclick="growRect(this)"]').on('mouseover', function() {
       //   console.log('hola mudno');
       //   console.log('mouseover', this)
